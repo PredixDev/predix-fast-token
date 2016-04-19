@@ -1,6 +1,5 @@
 'use strict'
 const chai = require('chai');
-const should = chai.should();
 const assert = chai.assert;
 const request = require('request');
 const sinon = require('sinon');

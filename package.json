@@ -20,12 +20,9 @@
   "author": "Ben Sykes <ben.sykes@ge.com>",
   "license": "ISC",
   "devDependencies": {
-    "bluebird": "^3.3.5",
     "chai": "^3.5.0",
-    "chai-as-promised": "^5.3.0",
     "istanbul": "^0.4.3",
     "mocha": "^2.4.5",
-    "mockery": "^1.6.2",
     "sinon": "^1.17.3"
   },
   "dependencies": {
