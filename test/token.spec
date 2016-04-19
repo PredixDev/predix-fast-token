@@ -45,6 +45,7 @@ describe('#verify', () => {
         token_util.verify(token1_valid, trusted_issuers).then((decoded) => {
             try {
                 assert.isTrue(reqStub.calledOnce, '/token_key called once');
+                assert.isTrue(reqStub.calledWith('https://090e7568-ec11-4318-b00a-041577780dfd.predix-uaa-staging.grc-apps.svc.ice.ge.com/token_key'), '/token_key at right URI');
                 assert.isDefined(decoded);
                 assert.equal(decoded.user_name, 'demo');
                 done();

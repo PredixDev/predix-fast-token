@@ -59,11 +59,13 @@ token_utils.verify = (token, trusted_issuers) => {
         // Is this token claiming to be from a trusted issuer.
         if(prelim && trusted_issuers.indexOf(prelim.iss) > -1) {
             const issuer = url.parse(prelim.iss);
-            const uaa_server = `${issuer.protocol}${issuer.host}`;
+            // Just want the protocol and host, strip off any path.
+            const uaa_server = url.format({ protocol: issuer.protocol, host: issuer.host, pathname: '/token_key'});
             // Grab the key for this UAA server and check.
-            getKey(uaa_server + '/token_key').then((key) => {
+            getKey(uaa_server).then((key) => {
                 jwt.verify(token, key, (err, decoded) => {
                     if(err) {
+                        debug('Invalid', err);
                         reject(err);
                     } else {
                         resolve(decoded);
