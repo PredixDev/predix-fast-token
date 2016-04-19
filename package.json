@@ -1,0 +1,37 @@
+{
+  "name": "predix-fast-token",
+  "version": "0.1.0",
+  "description": "Node module to verify UAA tokens used when protecting REST endpoints",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec test/token.spec",
+    "coverage": "istanbul cover _mocha -- -R spec test/token.spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.build.ge.com/hubs/predix-fast-token.git"
+  },
+  "keywords": [
+    "uaa",
+    "node",
+    "fast",
+    "token"
+  ],
+  "author": "Ben Sykes <ben.sykes@ge.com>",
+  "license": "ISC",
+  "devDependencies": {
+    "bluebird": "^3.3.5",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^5.3.0",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.4.5",
+    "mockery": "^1.6.2",
+    "sinon": "^1.17.3"
+  },
+  "dependencies": {
+    "debug": "^2.2.0",
+    "jsonwebtoken": "^5.7.0",
+    "request": "^2.72.0",
+    "url": "^0.11.0"
+  }
+}
