@@ -18,7 +18,7 @@
     "token"
   ],
   "author": "Ben Sykes <ben.sykes@ge.com>",
-  "license": "ISC",
+  "license": "SEE LICENSE IN LICENSE.md",
   "devDependencies": {
     "chai": "^3.5.0",
     "istanbul": "^0.4.3",

@@ -1,6 +1,6 @@
 'use strict'
 const chai = require('chai');
-const assert = chai.assert;
+const expect = chai.expect;
 const request = require('request');
 const sinon = require('sinon');
 const token_util = require('../index');
@@ -44,10 +44,10 @@ describe('#verify', () => {
         // It is valid and signed by the correct key
         token_util.verify(token1_valid, trusted_issuers).then((decoded) => {
             try {
-                assert.isTrue(reqStub.calledOnce, '/token_key called once');
-                assert.isTrue(reqStub.calledWith('https://090e7568-ec11-4318-b00a-041577780dfd.predix-uaa-staging.grc-apps.svc.ice.ge.com/token_key'), '/token_key at right URI');
-                assert.isDefined(decoded);
-                assert.equal(decoded.user_name, 'demo');
+                expect(reqStub.calledOnce, '/token_key called once').to.be.true;
+                expect(reqStub.calledWith('https://090e7568-ec11-4318-b00a-041577780dfd.predix-uaa-staging.grc-apps.svc.ice.ge.com/token_key'), '/token_key at right URI').to.be.true;
+                expect(decoded).to.exist;
+                expect(decoded.user_name).to.equal('demo');
                 done();
             } catch(e) {
                 return done(e);
@@ -59,18 +59,18 @@ describe('#verify', () => {
         // Call verify twice.  It should not call request on the second attempt
         token_util.verify(token1_valid, trusted_issuers).then((decoded) => {
             try {
-                assert.isTrue(reqStub.calledOnce, '/token_key called only once');
-                assert.isDefined(decoded);
-                assert.equal(decoded.user_name, 'demo');
+                expect(reqStub.calledOnce, '/token_key called only once').to.be.true;
+                expect(decoded).to.exist;
+                expect(decoded.user_name).to.equal('demo');
             } catch(e) {
                 return done(e);
             }
 
             token_util.verify(token1_valid, trusted_issuers).then((decoded) => {
                 try {
-                    assert.isTrue(reqStub.calledOnce, '/token_key called only once');
-                    assert.isDefined(decoded);
-                    assert.equal(decoded.user_name, 'demo');
+                    expect(reqStub.calledOnce, '/token_key called only once').to.be.true;
+                    expect(decoded).to.exist;
+                    expect(decoded.user_name).to.equal('demo');
                     done();
                 } catch(e) {
                     return done(e);
@@ -115,8 +115,8 @@ describe('#verify', () => {
         }).catch((err) => {
             // We expect an error here
             try {
-                assert.equal(err.name, 'TokenExpiredError');
-                assert.equal(err.message, 'jwt expired');
+                expect(err.name).to.equal('TokenExpiredError');
+                expect(err.message).to.equal('jwt expired');
                 done();
             } catch(e) {
                 return done(e);
@@ -131,8 +131,8 @@ describe('#verify', () => {
         }).catch((err) => {
             // We expect an error here
             try {
-                assert.equal(err.name, 'JsonWebTokenError');
-                assert.equal(err.message, 'invalid signature');
+                expect(err.name).to.equal('JsonWebTokenError');
+                expect(err.message).to.equal('invalid signature');
                 done();
             } catch(e) {
                 return done(e);
@@ -147,8 +147,8 @@ describe('#verify', () => {
         }).catch((err) => {
             // We expect an error here
             try {
-                assert.equal(err.name, 'Error');
-                assert.equal(err.message, 'Not a valid token');
+                expect(err.name).to.equal('Error');
+                expect(err.message).to.equal('Not a valid token');
                 done();
             } catch(e) {
                 return done(e);
@@ -163,8 +163,8 @@ describe('#verify', () => {
         }).catch((err) => {
             // We expect an error here
             try {
-                assert.equal(err.name, 'Error');
-                assert.equal(err.message, 'Not a valid token');
+                expect(err.name).to.equal('Error');
+                expect(err.message).to.equal('Not a valid token');
                 done();
             } catch(e) {
                 return done(e);
@@ -184,8 +184,8 @@ describe('#verify', () => {
         }).catch((err) => {
             // We expect an error here
             try {
-                assert.equal(err.name, 'JsonWebTokenError');
-                assert.equal(err.message, 'invalid signature');
+                expect(err.name).to.equal('JsonWebTokenError');
+                expect(err.message).to.equal('invalid signature');
                 done();
             } catch(e) {
                 return done(e);
@@ -200,8 +200,8 @@ describe('#verify', () => {
         }).catch((err) => {
             // We expect an error here
             try {
-                assert.equal(err.name, 'Error');
-                assert.equal(err.message, 'Not a trusted issuer');
+                expect(err.name).to.equal('Error');
+                expect(err.message).to.equal('Not a trusted issuer');
                 done();
             } catch(e) {
                 return done(e);
