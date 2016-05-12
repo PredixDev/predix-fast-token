@@ -50,7 +50,7 @@ app.all('*', bearerToken(), function(req, res, next) {
             res.status(403).send('Unauthorized');
         });
     } else {
-        console.log('Nope', err);
+		console.log('Nope, no token');
         res.status(401).send('Authentication Required');
     }
 });
@@ -58,7 +58,7 @@ app.all('*', bearerToken(), function(req, res, next) {
 app.get('/secure', (req, res, next) => {
     res.send('Hello ' + req.decoded.user_name + ', my authenticated chum!');
 });
- 
+
 // Need to let CF set the port if we're deploying there.
 const port = process.env.PORT || 9001;
 app.listen(port);
