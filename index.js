@@ -55,12 +55,18 @@ token_utils.clearCache = () => {
 token_utils.verify = (token, trusted_issuers) => {
     return new Promise((resolve, reject) => {
         // Decode the token to get the issuer
-        const prelim = jwt.decode(token);
+        let prelim = null;
+        try {
+            prelim = jwt.decode(token);
+        } catch(err) {
+            debug('Error decoding token', err);
+        }
         // Is this token claiming to be from a trusted issuer.
         if(prelim && trusted_issuers.indexOf(prelim.iss) > -1) {
             const issuer = url.parse(prelim.iss);
-            // Just want the protocol and host, strip off any path.
-            const uaa_server = url.format({ protocol: issuer.protocol, host: issuer.host, pathname: '/token_key'});
+            // Just want the protocol and host, and any path before '/oauth/token'.
+            const uaa_path = issuer.pathname.replace('/oauth/token', '');
+            const uaa_server = url.format({ protocol: issuer.protocol, host: issuer.host, pathname: uaa_path+'/token_key'});
             // Grab the key for this UAA server and check.
             getKey(uaa_server).then((key) => {
                 jwt.verify(token, key, (err, decoded) => {

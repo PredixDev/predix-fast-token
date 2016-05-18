@@ -8,13 +8,14 @@ const token_util = require('../index');
 const key1 = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0m59l2u9iDnMbrXHfqkO\nrn2dVQ3vfBJqcDuFUK03d+1PZGbVlNCqnkpIJ8syFppW8ljnWweP7+LiWpRoz0I7\nfYb3d8TjhV86Y997Fl4DBrxgM6KTJOuE/uxnoDhZQ14LgOU2ckXjOzOdTsnGMKQB\nLCl0vpcXBtFLMaSbpv1ozi8h7DJyVZ6EnFQZUWGdgTMhDrmqevfx95U/16c5WBDO\nkqwIn7Glry9n9Suxygbf8g5AzpWcusZgDLIIZ7JTUldBb8qU2a0Dl4mvLZOn4wPo\njfj9Cw2QICsc5+Pwf21fP+hzf+1WSRHbnYv8uanRO0gZ8ekGaghM/2H6gqJbo2nI\nJwIDAQAB\n-----END PUBLIC KEY-----\n";
 const key2 = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5VXMZBf2fUqNViwhkaKC\ntpnKX4MgKAcFA8KGiFYgChss8v/yB41wA8f+UfJmCOMIswRELKjHOp4tm9XtkCqy\nO/09RHqkrxG33za5tUhXSLaYX9MyMJcvbAXJ8cE9uu5Hv6Q4Gs65q/brwchh87Yb\nlCCvqGQ7QggEjqt2+bWGgjHDw9pKBXXRkA8t3fsH+sh2YgGCoRHH5Dd5QKpVkIGW\nnXlNIjRTd4g7rjE4Y3F1TaAhHpCoMOdviR++RIs3PdCi8ZUoS7V+mCWwOr61D7At\nxBjdnDDu/PZgLxlt1JEXt07V0xTzjztJ4r8qz5PkBZJeuZpHmiZoDNEquOhMQPhB\nIQIDAQAB\n-----END PUBLIC KEY-----\n"
 
-const token1_valid = 'eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI3ZDE0ZDVmMS0xMmVhLTQyNGItODE5Yi1iNWViNTk2NTVhOWEiLCJzdWIiOiIxNmVjMTk0OC02ZTBiLTQzMGUtYmE4Yi1kMzQ1ZDI3MzQ0YzciLCJzY29wZSI6WyJleGFtcGxlLndyaXRlIiwiZXhhbXBsZS5yZWFkIiwib3BlbmlkIl0sImNsaWVudF9pZCI6ImV4YW1wbGUiLCJjaWQiOiJleGFtcGxlIiwiYXpwIjoiZXhhbXBsZSIsImdyYW50X3R5cGUiOiJhdXRob3JpemF0aW9uX2NvZGUiLCJ1c2VyX2lkIjoiMTZlYzE5NDgtNmUwYi00MzBlLWJhOGItZDM0NWQyNzM0NGM3Iiwib3JpZ2luIjoidWFhIiwidXNlcl9uYW1lIjoiZGVtbyIsImVtYWlsIjoiZGVtb0Bsb2NhbCIsImF1dGhfdGltZSI6MTQ2MTAzODI1OSwicmV2X3NpZyI6IjU2YjJiNGZiIiwiaWF0IjoxNDYxMDM4Mjg0LCJleHAiOjM2MDg1MjE5MzEsImlzcyI6Imh0dHBzOi8vMDkwZTc1NjgtZWMxMS00MzE4LWIwMGEtMDQxNTc3NzgwZGZkLnByZWRpeC11YWEtc3RhZ2luZy5ncmMtYXBwcy5zdmMuaWNlLmdlLmNvbS9vYXV0aC90b2tlbiIsInppZCI6IjA5MGU3NTY4LWVjMTEtNDMxOC1iMDBhLTA0MTU3Nzc4MGRmZCIsImF1ZCI6WyJvcGVuaWQiLCJleGFtcGxlIl19.dK7S1sVmpc6-x3DASt22HXqw2BE_mqrr78xmznl-B7Yp4m0BJwpXi4YQes3zz-JpbZJ1mqdSz7utDskpZ6EUUVO5z9ftvxPfb3LvAOGsGUvL2no9I_2XD8vUrGqck3H9jOZhdv6iRbb-2HckozIAqUT-o1Bg4CYSP-OGtzCYPere0c7dCktxArlwMQ_6A7ydvSGUFnnj0PVlYhV98JPbw3JuC7XSv21vo5LSSAbXGefuKIQ6N9EoIzYnpNWenwe0Du2s7MwdDXSSOtrv2heIduf70LyaK-36N1kuVsah8-r0AWuHhv3KOVPEWfmB4nKLg2Klhn0h7WESXvLgh4rnEA';
-const token1_expired = 'eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIxM2I5ZTM0NC1iYzNiLTQwMTctYmQ4OC0wMWM5YjkwNTlhMzMiLCJzdWIiOiIxNmVjMTk0OC02ZTBiLTQzMGUtYmE4Yi1kMzQ1ZDI3MzQ0YzciLCJzY29wZSI6WyJleGFtcGxlLndyaXRlIiwiZXhhbXBsZS5yZWFkIiwib3BlbmlkIl0sImNsaWVudF9pZCI6ImV4YW1wbGUiLCJjaWQiOiJleGFtcGxlIiwiYXpwIjoiZXhhbXBsZSIsImdyYW50X3R5cGUiOiJhdXRob3JpemF0aW9uX2NvZGUiLCJ1c2VyX2lkIjoiMTZlYzE5NDgtNmUwYi00MzBlLWJhOGItZDM0NWQyNzM0NGM3Iiwib3JpZ2luIjoidWFhIiwidXNlcl9uYW1lIjoiZGVtbyIsImVtYWlsIjoiZGVtb0Bsb2NhbCIsImF1dGhfdGltZSI6MTQ2MTAzODQyNCwicmV2X3NpZyI6IjU2YjJiNGZiIiwiaWF0IjoxNDYxMDM4NDMzLCJleHAiOjE0NjEwMzg0MzQsImlzcyI6Imh0dHBzOi8vMDkwZTc1NjgtZWMxMS00MzE4LWIwMGEtMDQxNTc3NzgwZGZkLnByZWRpeC11YWEtc3RhZ2luZy5ncmMtYXBwcy5zdmMuaWNlLmdlLmNvbS9vYXV0aC90b2tlbiIsInppZCI6IjA5MGU3NTY4LWVjMTEtNDMxOC1iMDBhLTA0MTU3Nzc4MGRmZCIsImF1ZCI6WyJvcGVuaWQiLCJleGFtcGxlIl19.qHzUF9c3ws0DxEYsjEYpr0jV_qcxOC0I-Nyj_D8pl1_QOSvzVgx4aNjutcpxg5h9ZrSfErkDoWfR1W6qTh_vxoXDHmeSdSoWi4rciFQXn7iHcERAtT_Wj1rWMkvzpsx47qIjVuZAUXuNPEFT8myEePC2vJhgp1fsQHwB0N-mhQAADDdPnNeh5KhdFoqGmxRi8fJ1F9QcYV6FXHWdtnJAC-_RYgTw4NbrKPfYf3tzone0INxVsJr7xDhS3PeOP-lFywUJshwD-uqknydX7W-zRaD2Pxor95IjKTN9W8bbmcO5XPNJT-UGgL700h5wlnuUlUU4sG4zfgDc3iL_ugPuFQ';
-const token1_tampered = 'eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiI3ZDE0ZDVmMS0xMmVhLTQyNGItODE5Yi1iNWViNTk2NTVhOWEiLCJzdWIiOiIxNmVjMTk0OC02ZTBiLTQzMGUtYmE4Yi1kMzQ1ZDI3MzQ0YzciLCJzY29wZSI6WyJleGFtcGxlLndyaXRlIiwiZXhhbXBsZS5yZWFkIiwiYWRtaW4iLCJvcGVuaWQiXSwiY2xpZW50X2lkIjoiZXhhbXBsZSIsImNpZCI6ImV4YW1wbGUiLCJhenAiOiJleGFtcGxlIiwiZ3JhbnRfdHlwZSI6ImF1dGhvcml6YXRpb25fY29kZSIsInVzZXJfaWQiOiIxNmVjMTk0OC02ZTBiLTQzMGUtYmE4Yi1kMzQ1ZDI3MzQ0YzciLCJvcmlnaW4iOiJ1YWEiLCJ1c2VyX25hbWUiOiJkZW1vIiwiZW1haWwiOiJkZW1vQGxvY2FsIiwiYXV0aF90aW1lIjoxNDYxMDM4MjU5LCJyZXZfc2lnIjoiNTZiMmI0ZmIiLCJpYXQiOjE0NjEwMzgyODQsImV4cCI6MzYwODUyMTkzMSwiaXNzIjoiaHR0cHM6Ly8wOTBlNzU2OC1lYzExLTQzMTgtYjAwYS0wNDE1Nzc3ODBkZmQucHJlZGl4LXVhYS1zdGFnaW5nLmdyYy1hcHBzLnN2Yy5pY2UuZ2UuY29tL29hdXRoL3Rva2VuIiwiemlkIjoiMDkwZTc1NjgtZWMxMS00MzE4LWIwMGEtMDQxNTc3NzgwZGZkIiwiYXVkIjpbIm9wZW5pZCIsImV4YW1wbGUiXX0.dK7S1sVmpc6-x3DASt22HXqw2BE_mqrr78xmznl-B7Yp4m0BJwpXi4YQes3zz-JpbZJ1mqdSz7utDskpZ6EUUVO5z9ftvxPfb3LvAOGsGUvL2no9I_2XD8vUrGqck3H9jOZhdv6iRbb-2HckozIAqUT-o1Bg4CYSP-OGtzCYPere0c7dCktxArlwMQ_6A7ydvSGUFnnj0PVlYhV98JPbw3JuC7XSv21vo5LSSAbXGefuKIQ6N9EoIzYnpNWenwe0Du2s7MwdDXSSOtrv2heIduf70LyaK-36N1kuVsah8-r0AWuHhv3KOVPEWfmB4nKLg2Klhn0h7WESXvLgh4rnEA';
-const token_malformed = 'This is not a JWT';
+const token1_valid = 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIwOTkxNTYzZjVjYTI0YjM5YjAxYzAzZjVlMTBmMTY0YiIsInN1YiI6IjMxZmJjZGU1LTc2NWUtNDA4ZS1hMjhjLTBhMjM0OTQ1YzkxYSIsInNjb3BlIjpbIm9wZW5pZCJdLCJjbGllbnRfaWQiOiJ0ZXN0IiwiY2lkIjoidGVzdCIsImF6cCI6InRlc3QiLCJncmFudF90eXBlIjoiYXV0aG9yaXphdGlvbl9jb2RlIiwidXNlcl9pZCI6IjMxZmJjZGU1LTc2NWUtNDA4ZS1hMjhjLTBhMjM0OTQ1YzkxYSIsIm9yaWdpbiI6InVhYSIsInVzZXJfbmFtZSI6InRlc3RlciIsImVtYWlsIjoidGVzdGVyQGRlbW8ubG9jYWwiLCJhdXRoX3RpbWUiOjE0NjM1ODE1NjQsInJldl9zaWciOiI4YTBkMzVjZSIsImlhdCI6MTQ2MzU4MTYxNSwiZXhwIjozNjExMDY1MjYyLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbInRlc3QiLCJvcGVuaWQiXX0.bG36YmWafz1B7ZH-kMX4Wh_xDRpwGUNYGn2Cizxr3ywmWE7gsupDrIpzmGnlG389IGzMGfqEb_nwtHT8mqhLpxN-IwT1SIz9qWDH4kt07qsJGWnzAIDH_fF6np_iMghz6JQJsLYG5rIKoR7ibNJl4xK6PhoIk4F7Rw2GuLcKuq9ILQRRAJTfuzZEBjVIwqTbDulXgOveCbagjPF455i_QxsxMzpq001nlCN6OfjCbNpPnLjpFUp4eZ3K-gGQfdLTxMEgjnfl7B-U45vtOPBJ0sXIXvfOUXWneSt6BkPka3GCcz3GdqmYDbNvsZD5IRyCDjQ0sZv7IHZHQf-vgLReLg';
+const token1_expired = 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIwMzE1ZjFmYTFhOWE0MDFjOTc0Y2U0ZGUyMjA1MDQ5MiIsInN1YiI6IjMxZmJjZGU1LTc2NWUtNDA4ZS1hMjhjLTBhMjM0OTQ1YzkxYSIsInNjb3BlIjpbIm9wZW5pZCJdLCJjbGllbnRfaWQiOiJ0ZXN0IiwiY2lkIjoidGVzdCIsImF6cCI6InRlc3QiLCJncmFudF90eXBlIjoiYXV0aG9yaXphdGlvbl9jb2RlIiwidXNlcl9pZCI6IjMxZmJjZGU1LTc2NWUtNDA4ZS1hMjhjLTBhMjM0OTQ1YzkxYSIsIm9yaWdpbiI6InVhYSIsInVzZXJfbmFtZSI6InRlc3RlciIsImVtYWlsIjoidGVzdGVyQGRlbW8ubG9jYWwiLCJhdXRoX3RpbWUiOjE0NjM1ODE1NjQsInJldl9zaWciOiI4YTBkMzVjZSIsImlhdCI6MTQ2MzU4MTU3NiwiZXhwIjoxNDYzNTgxNTc3LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbInRlc3QiLCJvcGVuaWQiXX0.pZIIZlKMmNeMz-Rh_np1Rfo3Cj-cFW9M6i5c9U6ZUHy1I2Xz7r6Esan-ED16yxpayYfCTE40s0ukSAFkqpxDO3gtmFjvZqIv-APclZXklIJthR8l8KgBkwZ2I5eGIi__qKl1ydkTmPke9qXyDqIQQnRnqoSzA5aI5rza9XDbT7rJwJCbhvGYpP2GQ2roapSweTkagTmrcgyhKWxf8NA36yQ4eFh_JZ4Qj8zHRWFU3PvdR812a7mvm8o6ECsIPqKwg10kXh61sjASoFsO6bxlw6dGgP8j5PrHfcWO74MYuGa1S1IaaeafHm2i29zJ2iBdNq3PCQuPrvxQdiFW_L7wdg';
+const token1_tampered = 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIwOTkxNTYzZjVjYTI0YjM5YjAxYzAzZjVlMTBmMTY0YiIsInN1YiI6IjMxZmJjZGU1LTc2NWUtNDA4ZS1hMjhjLTBhMjM0OTQ1YzkxYSIsInNjb3BlIjpbIm9wZW5pZCIsImFkbWluIl0sImNsaWVudF9pZCI6InRlc3QiLCJjaWQiOiJ0ZXN0IiwiYXpwIjoidGVzdCIsImdyYW50X3R5cGUiOiJhdXRob3JpemF0aW9uX2NvZGUiLCJ1c2VyX2lkIjoiMzFmYmNkZTUtNzY1ZS00MDhlLWEyOGMtMGEyMzQ5NDVjOTFhIiwib3JpZ2luIjoidWFhIiwidXNlcl9uYW1lIjoidGVzdGVyIiwiZW1haWwiOiJ0ZXN0ZXJAZGVtby5sb2NhbCIsImF1dGhfdGltZSI6MTQ2MzU4MTU2NCwicmV2X3NpZyI6IjhhMGQzNWNlIiwiaWF0IjoxNDYzNTgxNjE1LCJleHAiOjM2MTEwNjUyNjIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MC91YWEvb2F1dGgvdG9rZW4iLCJ6aWQiOiJ1YWEiLCJhdWQiOlsidGVzdCIsIm9wZW5pZCJdfQ.bG36YmWafz1B7ZH-kMX4Wh_xDRpwGUNYGn2Cizxr3ywmWE7gsupDrIpzmGnlG389IGzMGfqEb_nwtHT8mqhLpxN-IwT1SIz9qWDH4kt07qsJGWnzAIDH_fF6np_iMghz6JQJsLYG5rIKoR7ibNJl4xK6PhoIk4F7Rw2GuLcKuq9ILQRRAJTfuzZEBjVIwqTbDulXgOveCbagjPF455i_QxsxMzpq001nlCN6OfjCbNpPnLjpFUp4eZ3K-gGQfdLTxMEgjnfl7B-U45vtOPBJ0sXIXvfOUXWneSt6BkPka3GCcz3GdqmYDbNvsZD5IRyCDjQ0sZv7IHZHQf-vgLReLg';
+const token_malformed = 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ0eXAiOiJKV1QifQ.eyJqdGkiOiIwOTkxNTYzZjVjYTI0YjM5YjAxYzAzZjVlMTBmMTY0YiIsInN1YiI6IjMxZmJjZGU1LTc2NWUtNDA4ZS1hMjhjLTBhMjM0OTQ1YzkxYSIsInNjb3BlIjpbIm9wZW5pZCJdLCJjbGllbnRfaWQiOjJ0ZXN0IiwiY2lkIjoidGVzdCIsImF6cCI6InRlc3QiLCJncmFudF90eXBlIjoiYXV0aG9yaXphdGlvbl9jb2RlIiwidXNlcl9pZCI6IjMxZmJjZGU1LTc2NWUtNDA4ZS1hMjhjLTBhMjM0OTQ1YzkxYSIsIm9yaWdpbiI6InVhYSIsInVzZXJfbmFtZSI6InRlc3RlciIsImVtYWlsIjoidGVzdGVyQGRlbW8ubG9jYWwiLCJhdXRoX3RpbWUiOjE0NjM1ODE1NjQsInJldl9zaWciOiI4YTBkMzVjZSIsImlhdCI6MTQ2MzU4MTYxNSwiZXhwIjozNjExMDY1MjYyLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvdWFhL29hdXRoL3Rva2VuIiwiemlkIjoidWFhIiwiYXVkIjpbInRlc3QiLCJvcGVuaWQiXX0.EmHihs0D2OXg3bilcq0rH2Rd31BunqKDY9etUOZva1jyXhUe7Im79KmOqwFpMujTe4ONyN2rm70m8vhsJjfxBiS-n6-84ZJRKrN4FIIpil8gqQXNRUQSUn513lj0_suZAl5_4jxwrDyk1L00q3hdfHO2IP9hxcKiXp_jtRZlHumUpR0pG411gNMnZYxmrQio08prPGqcUA2LOLFHBtg6QVYF_Ho0jOBl4AAHqVxpMfPHHrOuX5aYhTXbp__3Gefsv44TmfNvzK_LnVtC5LWoCJvuiUhz45agkeMIR5NDsNc_cA7G148-TjwCYIfJFEUut6j2y4qNJSrum-J-1T7IYg';
+const token_not_jwt = 'This is not a JWT';
 
-const trusted_issuers = ['https://f1615979-2469-4402-9a6e-3699caa34987.predix-uaa-staging.grc-apps.svc.ice.ge.com/oauth/token', 'https://090e7568-ec11-4318-b00a-041577780dfd.predix-uaa-staging.grc-apps.svc.ice.ge.com/oauth/token'];
-const trusted_issuers2 = ['https://30c5ac6b-20f2-4630-8889-5fbe75c0afea.predix-uaa-staging.grc-apps.svc.ice.ge.com/oauth/token'];
+const trusted_issuers = ['http://localhost:8080/uaa/oauth/token', 'https://uaa.example.com/oauth/token'];
+const trusted_issuers2 = ['https://uaa.evil.gov/oauth/token'];
 
 let reqStub;
 
@@ -45,9 +46,9 @@ describe('#verify', () => {
         token_util.verify(token1_valid, trusted_issuers).then((decoded) => {
             try {
                 expect(reqStub.calledOnce, '/token_key called once').to.be.true;
-                expect(reqStub.calledWith('https://090e7568-ec11-4318-b00a-041577780dfd.predix-uaa-staging.grc-apps.svc.ice.ge.com/token_key'), '/token_key at right URI').to.be.true;
+                expect(reqStub.calledWith('http://localhost:8080/uaa/token_key'), '/token_key at right URI').to.be.true;
                 expect(decoded).to.exist;
-                expect(decoded.user_name).to.equal('demo');
+                expect(decoded.user_name).to.equal('tester');
                 done();
             } catch(e) {
                 return done(e);
@@ -61,7 +62,7 @@ describe('#verify', () => {
             try {
                 expect(reqStub.calledOnce, '/token_key called only once').to.be.true;
                 expect(decoded).to.exist;
-                expect(decoded.user_name).to.equal('demo');
+                expect(decoded.user_name).to.equal('tester');
             } catch(e) {
                 return done(e);
             }
@@ -70,7 +71,7 @@ describe('#verify', () => {
                 try {
                     expect(reqStub.calledOnce, '/token_key called only once').to.be.true;
                     expect(decoded).to.exist;
-                    expect(decoded.user_name).to.equal('demo');
+                    expect(decoded.user_name).to.equal('tester');
                     done();
                 } catch(e) {
                     return done(e);
@@ -143,6 +144,22 @@ describe('#verify', () => {
     it('fail a malformed token', (done) => {
         // Use something that is not a token, verification should fail
         token_util.verify(token_malformed, trusted_issuers).then((decoded) => {
+            done(new Error('Should fail if token is not a token'));
+        }).catch((err) => {
+            // We expect an error here
+            try {
+                expect(err.name).to.equal('Error');
+                expect(err.message).to.equal('Not a valid token');
+                done();
+            } catch(e) {
+                return done(e);
+            }
+        });
+    });
+
+    it('fail a non JWT token', (done) => {
+        // Use something that is not a token, verification should fail
+        token_util.verify(token_not_jwt, trusted_issuers).then((decoded) => {
             done(new Error('Should fail if token is not a token'));
         }).catch((err) => {
             // We expect an error here
