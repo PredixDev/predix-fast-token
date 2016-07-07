@@ -1,3 +1,11 @@
+THIS REPO IS NO LONGER MAINTAINED - CODE HAS BEEN MOVED TO [PUBLIC GITHUB](https://github.com/PredixDev/predix-fast-token) AND PUBLISHED IN NPM
+```
+npm install --save predix-fast-token
+```
+
+---
+
+
 # predix-fast-token
 Node module to verify UAA tokens used when protecting REST endpoints
 
