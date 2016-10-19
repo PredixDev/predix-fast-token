@@ -1,11 +1,13 @@
 'use strict'
 const jwt = require('jsonwebtoken');
 const request = require('request');
+const rp = require('request-promise'); // FIXME: change getKey to use request-promise
 const url = require('url');
 const debug = require('debug')('predix-fast-token');
 
 let token_utils = {};
 let oauthKeyCache = {};
+let tokenCache = {};
 
 // This will fetch and cache the public key of the UAA used for this tenant.
 // This key can them be used to verify the JWT token presented so that the
@@ -93,4 +95,77 @@ token_utils.verify = (token, trusted_issuers) => {
     });
 }
 
+/**
+ * Verifies that a token was signed by a trusted UAA server and that it's still valid and has not been revoked
+ * by checking it against the UAA check_token endpoint.
+ *
+ * @param {string} token - The access token.
+ * @param {string} issuer - The UAA issuer URI
+ * @param {string} clientId - Your client id for the UAA issuer
+ * @param {string} clientSecret - Your client secret for the UAA issuer
+ * @param {obj}    opts - A dictionary of options
+ * @returns {promise} - A promise to verify the token.
+ *                      Resolves with the decoded/assocaited token if valid.
+ *                      Rejected with an error if invalid or an error occurs.
+ */
+token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts = {}) => {
+    opts.ttl = opts.ttl || 0; // Default to don't cache
+    opts.useCache = opts.useCache || true;
+    // See if token is in cache
+    if (opts.useCache) {
+        const cachedToken = tokenCache[token];
+        if (cachedToken && (cachedToken.expires > Date.now())) {
+            // Valid cached token
+            debug('Valid token found in cache', cachedToken);
+            return Promise.resolve(cachedToken.jwt);
+        }
+        else {
+            debug('No valid token found in cache', cachedToken);
+        }
+    }
+    // If not cached, send against the check_token endpoint
+    const issuer_url = url.parse(issuer);
+    const check_token_url = `${issuer_url.protocol}//${issuer_url.host}/check_token`;
+    debug (`Using ${check_token_url} to test token`);
+    const request_opts = {
+        uri: check_token_url,
+        auth: {
+            username: clientId,
+            password: clientSecret
+        },
+        method: 'POST',
+        form: {
+            token: token
+        }
+    }
+    return rp(request_opts)
+        .then( (body) => {
+            // Successful
+            const jwt = JSON.parse(body); 
+            debug('Check_token returned success', body);
+            if (+opts.ttl > 0) {
+                const cacheExpire = Date.now() + +opts.ttl
+                const cacheObj = {
+                    jwt: jwt,
+                    expires: Math.min(cacheExpire, +jwt.exp*1000) // Cache for as long as requested, or until it expires
+                }
+                tokenCache[token] = cacheObj;
+                debug(`Token cached until ${cacheExpire}`);
+            }
+            else {
+                debug('Token caching disabled');
+            }
+            
+            return body;
+        })
+        .catch( (error) => {
+            // Invalid token or failed request
+            // FIXME: Clean me up to return less data
+            debug('UAA check_token returned error', error);
+            throw error;
+
+        });
+    
+
+}
 module.exports = token_utils;

@@ -28,7 +28,8 @@
   "dependencies": {
     "debug": "^2.2.0",
     "jsonwebtoken": "^5.7.0",
-    "request": "^2.72.0",
+    "request": "^2.75.0",
+    "request-promise": "^4.1.1",
     "url": "^0.11.0"
   }
 }
