@@ -162,9 +162,13 @@ token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts = {}) =>
         })
         .catch( (error) => {
             // Invalid token or failed request
-            // FIXME: Clean me up to return less data
             debug('UAA check_token returned error', error);
-            throw error;
+            if (error.error.error === "invalid_token") {
+                throw error.error;
+            }
+            else {
+                throw error;
+            }
 
         });
     
