@@ -99,11 +99,13 @@ token_utils.verify = (token, trusted_issuers) => {
  * Verifies that a token was signed by a trusted UAA server and that it's still valid and has not been revoked
  * by checking it against the UAA check_token endpoint.
  *
- * @param {string} token - The access token.
- * @param {string} issuer - The UAA issuer URI
- * @param {string} clientId - Your client id for the UAA issuer
- * @param {string} clientSecret - Your client secret for the UAA issuer
- * @param {obj}    opts - A dictionary of options
+ * @param {string}  token - The access token.
+ * @param {string}  issuer - The UAA issuer URI
+ * @param {string}  clientId - Your client id for the UAA issuer
+ * @param {string}  clientSecret - Your client secret for the UAA issuer
+ * @param {Object}  [opts={}] - A dictionary of options
+ * @param {int}     [opts.ttl=0] - The maximum time to live in cache for a validated token.
+ * @param {bool}    [opts.useCache=true] - Whether cached values should be used for verification.
  * @returns {promise} - A promise to verify the token.
  *                      Resolves with the decoded/assocaited token if valid.
  *                      Rejected with an error if invalid or an error occurs.
