@@ -114,7 +114,7 @@ token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts = {}) =>
     // See if token is in cache
     if (opts.useCache) {
         const cachedToken = tokenCache[token];
-        if (cachedToken && (cachedToken.expires > Date.now())) {
+        if (cachedToken && cachedToken.expires > Date.now()) {
             // Valid cached token
             debug('Valid token found in cache', cachedToken);
             return Promise.resolve(cachedToken.jwt);
@@ -125,7 +125,7 @@ token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts = {}) =>
     }
     // If not cached, send against the check_token endpoint
     const issuer_url = url.parse(issuer);
-    const check_token_url = `${issuer_url.protocol}//${issuer_url.host}/check_token`;
+    const check_token_url = url.format({ protocol: issuer_url.protocol, host: issuer_url.host, pathname:'/check_token'});
     debug (`Using ${check_token_url} to test token`);
     const request_opts = {
         uri: check_token_url,
@@ -136,13 +136,13 @@ token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts = {}) =>
         method: 'POST',
         form: {
             token: token
-        }
+        },
+        json: true
     }
     return rp(request_opts)
-        .then( (body) => {
-            // Successful
-            const jwt = JSON.parse(body); 
-            debug('Check_token returned success', body);
+        .then( (jwt) => {
+            // Successful 
+            debug('Check_token returned success', jwt);
             if (+opts.ttl > 0) {
                 const cacheExpire = Date.now() + +opts.ttl
                 const cacheObj = {
@@ -156,7 +156,7 @@ token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts = {}) =>
                 debug('Token caching disabled');
             }
             
-            return body;
+            return jwt;
         })
         .catch( (error) => {
             // Invalid token or failed request
