@@ -4,10 +4,12 @@ const request = require('request');
 const rp = require('request-promise'); // FIXME: change getKey to use request-promise
 const url = require('url');
 const debug = require('debug')('predix-fast-token');
+const NodeCache = require( "node-cache" );
+const tokenCache = new NodeCache();
 
 let token_utils = {};
 let oauthKeyCache = {};
-let tokenCache = {};
+token_utils._tokenCache = tokenCache; // Exposed for testing
 
 // This will fetch and cache the public key of the UAA used for this tenant.
 // This key can them be used to verify the JWT token presented so that the
@@ -43,7 +45,7 @@ const getKey = (keyURL) => {
 token_utils.clearCache = () => {
     debug('Clearing key cache');
     oauthKeyCache = {};
-    tokenCache = {};
+    tokenCache.flushAll();
 }
 
 /**
@@ -105,25 +107,27 @@ token_utils.verify = (token, trusted_issuers) => {
  * @param {string}  clientId - Your client id for the UAA issuer
  * @param {string}  clientSecret - Your client secret for the UAA issuer
  * @param {Object}  [opts={}] - A dictionary of options
- * @param {int}     [opts.ttl=0] - The maximum time to live in cache for a validated token.
+ * @param {int}     [opts.ttl=0] - The maximum time to live in cache for a validated token, in seconds.
  * @param {bool}    [opts.useCache=true] - Whether cached values should be used for verification.
  * @returns {promise} - A promise to verify the token.
  *                      Resolves with the decoded/assocaited token if valid.
  *                      Rejected with an error if invalid or an error occurs.
  */
 token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts = {}) => {
+    debug("#remoteVerify called with options:", opts);
     opts.ttl = opts.ttl || 0; // Default to don't cache
-    opts.useCache = opts.useCache || true;
+    opts.useCache = (typeof opts.useCache === 'undefined') ? true : opts.useCache;
     // See if token is in cache
+    debug("#remoteVerify default options applied: ", opts);
     if (opts.useCache) {
-        const cachedToken = tokenCache[token];
-        if (cachedToken && cachedToken.expires > Date.now()) {
+        const cachedJwt = tokenCache.get(token);
+        if (cachedJwt && +cachedJwt.exp*1000 > Date.now()) {
             // Valid cached token
-            debug('Valid token found in cache', cachedToken);
-            return Promise.resolve(cachedToken.jwt);
+            debug('Valid token found in cache', cachedJwt);
+            return Promise.resolve(cachedJwt);
         }
         else {
-            debug('No valid token found in cache', cachedToken);
+            debug('No valid token found in cache', cachedJwt);
         }
     }
     // If not cached, send against the check_token endpoint
@@ -147,12 +151,8 @@ token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts = {}) =>
             // Successful 
             debug('Check_token returned success', jwt);
             if (+opts.ttl > 0) {
-                const cacheExpire = Date.now() + +opts.ttl
-                const cacheObj = {
-                    jwt: jwt,
-                    expires: Math.min(cacheExpire, +jwt.exp*1000) // Cache for as long as requested, or until it expires
-                }
-                tokenCache[token] = cacheObj;
+                const cacheExpire = Date.now() + +opts.ttl*1000
+                tokenCache.set(token, jwt, opts.ttl);
                 debug(`Token cached until ${cacheExpire}`);
             }
             else {
