@@ -43,6 +43,7 @@ const getKey = (keyURL) => {
 token_utils.clearCache = () => {
     debug('Clearing key cache');
     oauthKeyCache = {};
+    tokenCache = {};
 }
 
 /**
