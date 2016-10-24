@@ -164,12 +164,13 @@ token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts = {}) =>
         .catch( (error) => {
             // Invalid token or failed request
             debug('UAA check_token returned error', error);
-            if (error.error.error === "invalid_token") {
+            if (error.error) {
                 throw error.error;
             }
             else {
                 throw error;
             }
+            
 
         });
     
