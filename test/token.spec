@@ -44,12 +44,11 @@ const token_opaque_decoded = {
 }
 const validClient = { issuer: 'https://uaa.example.predix.io/oauth/token', clientId: 'uaaClient', clientSecret: 'secret' }
 const invalidClient = { issuer: 'https://uaa.example.predix.io/oauth/token', clientId: 'uaaClient', clientSecret: 'nogood' }
-
+const missingClient = { issuer: 'https://no.uaa.here.com/oauth/token', clientId: 'uaaClient', clientSecret: 'nogood' }
 const trusted_issuers = ['http://localhost:8080/uaa/oauth/token', 'https://uaa.example.com/oauth/token'];
 const trusted_issuers2 = ['https://uaa.evil.gov/oauth/token'];
 
 let reqStub;
-let mockUaaServer;
 let cacheSetSpy;
 let cacheGetSpy;
 let mockCheckToken;
@@ -97,10 +96,14 @@ beforeEach((done) => {
     token_util.clearCache();
 
     // Create fake server for mocking responses
-    var mockUaaServer = nock(/.*\.predix\.io/).persist()
+    let mockUaaServer = nock(/.*\.predix\.io/).persist()
         .post('/check_token')
         .reply(mockCheckToken);
     done();
+    let mockMissingServer = nock('https://no.uaa.here.com').persist()
+        .post('/check_token')
+        .reply(404);
+
 
     // Spy on cache
     cacheSetSpy = sinon.spy(token_util._tokenCache, "set");
@@ -358,6 +361,11 @@ describe('#remoteVerify', () => {
                         expect(secondJwt).to.deep.equal(firstJwt);
                     });
             });
+    });
+    it('returns 404 on unknown url', () => {
+        let verifyPromise = token_util.remoteVerify(token1_expired, missingClient.issuer, missingClient.clientId, missingClient.clientSecret);
+        return expect(verifyPromise).to.eventually.be.rejected
+            .and.have.property('statusCode', 404);
     });
     
 });
