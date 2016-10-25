@@ -1,11 +1,3 @@
-THIS REPO IS NO LONGER MAINTAINED - CODE HAS BEEN MOVED TO [PUBLIC GITHUB](https://github.com/PredixDev/predix-fast-token) AND PUBLISHED IN NPM
-```
-npm install --save predix-fast-token
-```
-
----
-
-
 # predix-fast-token
 Node module to verify UAA tokens used when protecting REST endpoints
 
@@ -13,7 +5,7 @@ Node module to verify UAA tokens used when protecting REST endpoints
 Install via npm
 
 ```
-npm install --save git://github.build.ge.com/hubs/predix-fast-token.git
+npm install --save predix-fast-token
 ```
 
 Basic usage with a JWT token and list of trusted issuers
@@ -39,7 +31,7 @@ const bearerToken = require('express-bearer-token');
 const predixFastToken = require('predix-fast-token');
 const app = express();
 
-const trusted_issuers = ['https://f1615979-2469-4402-9a6e-3699caa34987.predix-uaa-staging.grc-apps.svc.ice.ge.com/oauth/token', 'https://090e7568-ec11-4318-b00a-041577780dfd.predix-uaa-staging.grc-apps.svc.ice.ge.com/oauth/token'];
+const trusted_issuers = ['https://example.uaa.predix.io/oauth/token', 'https://another.uaa.predix.io/oauth/token'];
 
 app.get('/hello', (req, res, next) => {
     res.send('Howdy my unsecured friend!');
