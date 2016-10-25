@@ -1,6 +1,6 @@
-'use strict'
+'use strict';
 const chai = require('chai');
-const chaiAsPromised = require("chai-as-promised");
+const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 const request = require('request');
@@ -8,7 +8,6 @@ const sinon = require('sinon');
 const nock = require('nock');
 const qs = require('query-string');
 const token_util = require('../index');
-
 
 const key1 = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0m59l2u9iDnMbrXHfqkO\nrn2dVQ3vfBJqcDuFUK03d+1PZGbVlNCqnkpIJ8syFppW8ljnWweP7+LiWpRoz0I7\nfYb3d8TjhV86Y997Fl4DBrxgM6KTJOuE/uxnoDhZQ14LgOU2ckXjOzOdTsnGMKQB\nLCl0vpcXBtFLMaSbpv1ozi8h7DJyVZ6EnFQZUWGdgTMhDrmqevfx95U/16c5WBDO\nkqwIn7Glry9n9Suxygbf8g5AzpWcusZgDLIIZ7JTUldBb8qU2a0Dl4mvLZOn4wPo\njfj9Cw2QICsc5+Pwf21fP+hzf+1WSRHbnYv8uanRO0gZ8ekGaghM/2H6gqJbo2nI\nJwIDAQAB\n-----END PUBLIC KEY-----\n";
 const key2 = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5VXMZBf2fUqNViwhkaKC\ntpnKX4MgKAcFA8KGiFYgChss8v/yB41wA8f+UfJmCOMIswRELKjHOp4tm9XtkCqy\nO/09RHqkrxG33za5tUhXSLaYX9MyMJcvbAXJ8cE9uu5Hv6Q4Gs65q/brwchh87Yb\nlCCvqGQ7QggEjqt2+bWGgjHDw9pKBXXRkA8t3fsH+sh2YgGCoRHH5Dd5QKpVkIGW\nnXlNIjRTd4g7rjE4Y3F1TaAhHpCoMOdviR++RIs3PdCi8ZUoS7V+mCWwOr61D7At\nxBjdnDDu/PZgLxlt1JEXt07V0xTzjztJ4r8qz5PkBZJeuZpHmiZoDNEquOhMQPhB\nIQIDAQAB\n-----END PUBLIC KEY-----\n"
@@ -20,15 +19,15 @@ const token_malformed = 'eyJhbGciOiJSUzI1NiIsImtpZCI6ImxlZ2FjeS10b2tlbi1rZXkiLCJ
 const token_not_jwt = 'This is not a JWT';
 const token_opaque = 'dfbe8dbc2d814438897c6cbb6e2363f5';
 // Note: this is not a valid JWT - hand modified for test results
-const token_opaque_decoded = { 
+const token_opaque_decoded = {
     user_id: '0bc9fe45-6c9e-4ae8-bde4-bde5a7d12345',
     user_name: 'testuser',
     email: 'test_user@predix.io',
     client_id: 'uaaClient',
     exp: 3497020914,
-    scope: [ 'openid' ],
+    scope: ['openid'],
     jti: 'dfbe8dbc2d814438897c6cbb6e2363f5',
-    aud: [ 'openid', 'uaaClient' ],
+    aud: ['openid', 'uaaClient'],
     sub: '0bc9fe45-6c9e-4ae8-bde4-cde3a7d12932',
     iss: 'https://uaa.example.predix.io/oauth/token',
     iat: 1477334362,
@@ -40,11 +39,11 @@ const token_opaque_decoded = {
     rev_sig: '91a62430',
     nonce: 'cb296893856f20c0b1bf56b0a9ca8914',
     origin: 'example-uaa',
-    revocable: true 
-}
-const validClient = { issuer: 'https://uaa.example.predix.io/oauth/token', clientId: 'uaaClient', clientSecret: 'secret' }
-const invalidClient = { issuer: 'https://uaa.example.predix.io/oauth/token', clientId: 'uaaClient', clientSecret: 'nogood' }
-const missingClient = { issuer: 'https://no.uaa.here.com/oauth/token', clientId: 'uaaClient', clientSecret: 'nogood' }
+    revocable: true
+};
+const validClient = { issuer: 'https://uaa.example.predix.io/oauth/token', clientId: 'uaaClient', clientSecret: 'secret' };
+const invalidClient = { issuer: 'https://uaa.example.predix.io/oauth/token', clientId: 'uaaClient', clientSecret: 'nogood' };
+const missingClient = { issuer: 'https://no.uaa.here.com/oauth/token', clientId: 'uaaClient', clientSecret: 'nogood' };
 const trusted_issuers = ['http://localhost:8080/uaa/oauth/token', 'https://uaa.example.com/oauth/token'];
 const trusted_issuers2 = ['https://uaa.evil.gov/oauth/token'];
 
@@ -54,10 +53,10 @@ let cacheGetSpy;
 let mockCheckToken;
 // ====================================================
 // MOCKS
-mockCheckToken = sinon.spy(function(uri,body) {;
-    const parsedBody = qs.parse(body)
+mockCheckToken = sinon.spy(function (uri, body) {
+    const parsedBody = qs.parse(body);
     const token = parsedBody.token;
-    const validClientAuth = `Basic ${new Buffer(validClient.clientId + ":" + validClient.clientSecret).toString("base64")}`;
+    const validClientAuth = `Basic ${new Buffer(`${validClient.clientId}:${validClient.clientSecret}`).toString('base64')}`;
     if (this.req.headers.authorization === validClientAuth) {
         // Valid client
         if (token === token_opaque) {
@@ -65,28 +64,24 @@ mockCheckToken = sinon.spy(function(uri,body) {;
             return [
                 200,
                 token_opaque_decoded,
-                {} 
+                {}
             ];
-        }
-        else {
-            return [ 
-                400, 
+        } else {
+            return [
+                400,
                 { error: 'invalid_token', error_description: `The token expired, was revoked, or the token ID is incorrect: ${token}` },
                 {}
             ];
         }
-    }
-    else {
+    } else {
         // Unauthorized client
         return [
             401,
-            { error: 'unauthorized', error_description: 'Bad credentials' } ,
-            {'www-authenticate': 'Basic realm="UAA/client", error="unauthorized", error_description="Bad credentials"'} 
+            { error: 'unauthorized', error_description: 'Bad credentials' },
+            { 'www-authenticate': 'Basic realm="UAA/client", error="unauthorized", error_description="Bad credentials"' }
         ];
     }
-    
 });
-
 
 beforeEach((done) => {
     // Mock out the get call for fetching the key
@@ -96,18 +91,17 @@ beforeEach((done) => {
     token_util.clearCache();
 
     // Create fake server for mocking responses
-    let mockUaaServer = nock(/.*\.predix\.io/).persist()
+    nock(/.*\.predix\.io/).persist()
         .post('/check_token')
         .reply(mockCheckToken);
     done();
-    let mockMissingServer = nock('https://no.uaa.here.com').persist()
+    nock('https://no.uaa.here.com').persist()
         .post('/check_token')
         .reply(404);
 
-
     // Spy on cache
-    cacheSetSpy = sinon.spy(token_util._tokenCache, "set");
-    cacheGetSpy = sinon.spy(token_util._tokenCache, "get");
+    cacheSetSpy = sinon.spy(token_util._tokenCache, 'set');
+    cacheGetSpy = sinon.spy(token_util._tokenCache, 'get');
 });
 
 afterEach((done) => {
@@ -117,7 +111,7 @@ afterEach((done) => {
     mockCheckToken.reset();
     done();
 });
- 
+
 // ====================================================
 // TESTS
 
@@ -132,7 +126,7 @@ describe('#verify', () => {
                 expect(decoded).to.exist;
                 expect(decoded.user_name).to.equal('tester');
                 done();
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
         });
@@ -145,7 +139,7 @@ describe('#verify', () => {
                 expect(reqStub.calledOnce, '/token_key called only once').to.be.true;
                 expect(decoded).to.exist;
                 expect(decoded.user_name).to.equal('tester');
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
 
@@ -155,7 +149,7 @@ describe('#verify', () => {
                     expect(decoded).to.exist;
                     expect(decoded.user_name).to.equal('tester');
                     done();
-                } catch(e) {
+                } catch (e) {
                     return done(e);
                 }
             });
@@ -170,7 +164,7 @@ describe('#verify', () => {
 
         token_util.verify(token1_valid, trusted_issuers).then((decoded) => {
             done(new Error('Should fail if unable to get the key'));
-        }).catch((err) => {
+        }).catch(() => {
             // We expect an error here
             done();
         });
@@ -184,7 +178,7 @@ describe('#verify', () => {
 
         token_util.verify(token1_valid, trusted_issuers).then((decoded) => {
             done(new Error('Should fail no response getting the key'));
-        }).catch((err) => {
+        }).catch(() => {
             // We expect an error here
             done();
         });
@@ -201,7 +195,7 @@ describe('#verify', () => {
                 expect(err.name).to.equal('TokenExpiredError');
                 expect(err.message).to.equal('jwt expired');
                 done();
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
         });
@@ -217,7 +211,7 @@ describe('#verify', () => {
                 expect(err.name).to.equal('JsonWebTokenError');
                 expect(err.message).to.equal('invalid signature');
                 done();
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
         });
@@ -233,7 +227,7 @@ describe('#verify', () => {
                 expect(err.name).to.equal('Error');
                 expect(err.message).to.equal('Not a valid token');
                 done();
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
         });
@@ -249,7 +243,7 @@ describe('#verify', () => {
                 expect(err.name).to.equal('Error');
                 expect(err.message).to.equal('Not a valid token');
                 done();
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
         });
@@ -265,7 +259,7 @@ describe('#verify', () => {
                 expect(err.name).to.equal('Error');
                 expect(err.message).to.equal('Not a valid token');
                 done();
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
         });
@@ -286,7 +280,7 @@ describe('#verify', () => {
                 expect(err.name).to.equal('JsonWebTokenError');
                 expect(err.message).to.equal('invalid signature');
                 done();
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
         });
@@ -302,7 +296,7 @@ describe('#verify', () => {
                 expect(err.name).to.equal('Error');
                 expect(err.message).to.equal('Not a trusted issuer');
                 done();
-            } catch(e) {
+            } catch (e) {
                 return done(e);
             }
         });
@@ -327,34 +321,33 @@ describe('#remoteVerify', () => {
     });
     it('caches until TTL expires', () => {
         const ttl = 1000;
-        let verifyPromise = token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, {ttl:ttl})
-            .then( (jwt) => {
+        token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, { ttl: ttl })
+            .then((jwt) => {
                 expect(cacheSetSpy.calledOnce).to.be.true;
-            })
-        
+            });
     });
     it('does not cache for 0 TTL', () => {
-        let verifyPromise = token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, {ttl:0})
-            .then( (jwt) => {
+        token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, { ttl: 0 })
+            .then((jwt) => {
                 return expect(cacheSetSpy.callCount).to.equal(0);
-            })
+            });
     });
     it('does not access cache if useCache disabled', () => {
         const ttl = 1000;
-        return token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, {ttl:ttl, useCache: false})
-            .then( (jwt) => {
+        return token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, { ttl: ttl, useCache: false })
+            .then((jwt) => {
                 return expect(cacheGetSpy.callCount).to.equal(0);
-            })
+            });
     });
     it('returns cached value if valid', () => {
         const ttl = 1000;
-        return token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, {ttl:ttl, useCache: true})
-            .then( (firstJwt) => {
+        return token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, { ttl: ttl, useCache: true })
+            .then((firstJwt) => {
                 expect(cacheSetSpy.calledOnce).to.be.true;
                 expect(mockCheckToken.calledOnce).to.be.true;
                 expect(cacheGetSpy.calledOnce).to.be.true;
-                return token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, {ttl:ttl, useCache: true})
-                    .then ( (secondJwt) => {
+                return token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, { ttl: ttl, useCache: true })
+                    .then((secondJwt) => {
                         expect(cacheSetSpy.calledOnce).to.be.true;
                         expect(mockCheckToken.calledOnce).to.be.true;
                         expect(cacheGetSpy.calledTwice).to.be.true;
@@ -367,5 +360,4 @@ describe('#remoteVerify', () => {
         return expect(verifyPromise).to.eventually.be.rejected
             .and.have.property('statusCode', 404);
     });
-    
 });
