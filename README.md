@@ -72,7 +72,7 @@ console.log('Started on port ' + port);
 
 ```
 ### Remote Verification
-Validates a token is valid by sending it against the UAA's `/check_token` endpoint, with optional caching.
+Validates a token is valid by sending it against the UAA's `/check_token` endpoint, with optional in-memory caching.
 Using remote verification adds network latency to the verification request, compared to local verification,
 but is necessary if you need to validate [opaque tokens](https://www.cloudfoundry.org/opaque-access-tokens-cloud-foundry/)
 or check if a token has been revoked.
