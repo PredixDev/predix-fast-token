@@ -112,7 +112,8 @@ token_utils.verify = (token, trusted_issuers) => {
  *                      Resolves with the decoded/assocaited token if valid.
  *                      Rejected with an error if invalid or an error occurs.
  */
-token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts = {}) => {
+token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts) => {
+    opts = opts || {};
     debug('remoteVerify called with options', opts);
     opts.ttl = opts.ttl || 0; // Default to don't cache
     opts.useCache = (typeof opts.useCache === 'undefined') ? true : opts.useCache;
