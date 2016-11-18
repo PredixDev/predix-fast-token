@@ -2,7 +2,7 @@
 Node module to verify UAA tokens used when protecting REST endpoints
 
 ## Intro
-Security is important, but having to make a POST call to UAA with every request to verify a token adds latency. Predix-fast-token redeuces the number of network calls and is ~200+ times faster. We ran a test of 100,000 predix-fast-token calls and it came out to <1 ms. Don't trust us though, try youself and see what improvements you can get compared to your current method.
+Security is important, but having to make a POST call to UAA with every request to verify a token adds latency. Predix-fast-token reduces the number of network calls and is ~200+ times faster. We ran a test of 100,000 predix-fast-token calls and it came out to <1 ms. Don't trust us though, try youself and see what improvements you can get compared to your current method.
 
 ## Installation
 Install via npm
