@@ -24,7 +24,6 @@
     "chai-as-promised": "^6.0.0",
     "istanbul": "^0.4.3",
     "mocha": "^2.4.5",
-    "nock": "^9.0.0",
     "query-string": "^4.2.3",
     "sinon": "^1.17.4"
   },

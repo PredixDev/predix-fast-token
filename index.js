@@ -145,7 +145,7 @@ token_utils.remoteVerify = (token, issuer, clientId, clientSecret, opts) => {
         },
         json: true
     };
-    return rp(request_opts)
+    return rp.post(request_opts)
         .then((jwt) => {
             // Successful
             debug('Check_token returned success', jwt);

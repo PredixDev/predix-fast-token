@@ -4,8 +4,8 @@ const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const expect = chai.expect;
 const request = require('request');
+const rp = require('request-promise');
 const sinon = require('sinon');
-const nock = require('nock');
 const qs = require('query-string');
 const token_util = require('../index');
 
@@ -41,6 +41,8 @@ const token_opaque_decoded = {
     origin: 'example-uaa',
     revocable: true
 };
+const badTokenResponse = token => ({ error: { error: 'invalid_token', error_description: `The token expired, was revoked, or the token ID is incorrect: ${token}` }});
+const badCredentialsResponse = () => ({ error: { error: 'unauthorized', error_description: 'Bad credentials' }});
 const validClient = { issuer: 'https://uaa.example.predix.io/oauth/token', clientId: 'uaaClient', clientSecret: 'secret' };
 const invalidClient = { issuer: 'https://uaa.example.predix.io/oauth/token', clientId: 'uaaClient', clientSecret: 'nogood' };
 const missingClient = { issuer: 'https://no.uaa.here.com/oauth/token', clientId: 'uaaClient', clientSecret: 'nogood' };
@@ -48,67 +50,37 @@ const trusted_issuers = ['http://localhost:8080/uaa/oauth/token', 'https://uaa.e
 const trusted_issuers2 = ['https://uaa.evil.gov/oauth/token'];
 
 let reqStub;
+let postStub;
 let cacheSetSpy;
 let cacheGetSpy;
-let mockCheckToken;
+
 // ====================================================
 // MOCKS
-mockCheckToken = sinon.spy(function (uri, body) {
-    const parsedBody = qs.parse(body);
-    const token = parsedBody.token;
-    const validClientAuth = `Basic ${new Buffer(`${validClient.clientId}:${validClient.clientSecret}`).toString('base64')}`;
-    if (this.req.headers.authorization === validClientAuth) {
-        // Valid client
-        if (token === token_opaque) {
-            // Valid opaque token
-            return [
-                200,
-                token_opaque_decoded,
-                {}
-            ];
-        } else {
-            return [
-                400,
-                { error: 'invalid_token', error_description: `The token expired, was revoked, or the token ID is incorrect: ${token}` },
-                {}
-            ];
-        }
-    } else {
-        // Unauthorized client
-        return [
-            401,
-            { error: 'unauthorized', error_description: 'Bad credentials' },
-            { 'www-authenticate': 'Basic realm="UAA/client", error="unauthorized", error_description="Bad credentials"' }
-        ];
-    }
-});
 
 beforeEach((done) => {
-    // Mock out the get call for fetching the key
+    // Mock out the get call for fetching the key (happy path)
     reqStub = sinon.stub(request, 'get');
     reqStub.yields(null, { statusCode: 200 }, JSON.stringify({ value: key1 }));
+
+    // Mock out the post call for check_token (happy path)
+    postStub = sinon.stub(rp, 'post');
+    postStub.returns(Promise.resolve(token_opaque_decoded));
+
     // Clean out any cached keys
     token_util.clearCache();
-
-    // Create fake server for mocking responses
-    nock(/.*\.predix\.io/).persist()
-        .post('/check_token')
-        .reply(mockCheckToken);
-    done();
-    nock('https://no.uaa.here.com').persist()
-        .post('/check_token')
-        .reply(404);
 
     // Spy on cache
     cacheSetSpy = sinon.spy(token_util._tokenCache, 'set');
     cacheGetSpy = sinon.spy(token_util._tokenCache, 'get');
+
+    done();
 });
 
 afterEach((done) => {
     request.get.restore();
+    rp.post.restore();
     cacheSetSpy.restore();
     cacheGetSpy.restore();
-    mockCheckToken.reset();
     done();
 });
 
@@ -310,11 +282,19 @@ describe('#remoteVerify', () => {
             .and.deep.equal(token_opaque_decoded);
     });
     it('returns error from UAA on invalid token', () => {
+        rp.post.restore();
+        postStub = sinon.stub(rp, 'post');
+        postStub.returns(Promise.reject(badTokenResponse(token1_expired)));
+
         let verifyPromise = token_util.remoteVerify(token1_expired, validClient.issuer, validClient.clientId, validClient.clientSecret);
         return expect(verifyPromise).to.eventually.be.rejected
             .and.have.property('error', 'invalid_token');
     });
     it('returns error from UAA on bad client credentials', () => {
+        rp.post.restore();
+        postStub = sinon.stub(rp, 'post');
+        postStub.returns(Promise.reject(badCredentialsResponse()));
+
         let verifyPromise = token_util.remoteVerify(token_opaque, invalidClient.issuer, invalidClient.clientId, invalidClient.clientSecret);
         return expect(verifyPromise).to.eventually.be.rejected
             .and.have.property('error', 'unauthorized');
@@ -343,19 +323,23 @@ describe('#remoteVerify', () => {
         const ttl = 1000;
         return token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, { ttl: ttl, useCache: true })
             .then((firstJwt) => {
-                expect(cacheSetSpy.calledOnce).to.be.true;
-                expect(mockCheckToken.calledOnce).to.be.true;
-                expect(cacheGetSpy.calledOnce).to.be.true;
+                expect(cacheSetSpy.calledOnce, 'cache set called only once').to.be.true;
+                expect(postStub.calledOnce, '/check_token called only once').to.be.true;
+                expect(cacheGetSpy.calledOnce, 'cache get called only once').to.be.true;
                 return token_util.remoteVerify(token_opaque, validClient.issuer, validClient.clientId, validClient.clientSecret, { ttl: ttl, useCache: true })
                     .then((secondJwt) => {
-                        expect(cacheSetSpy.calledOnce).to.be.true;
-                        expect(mockCheckToken.calledOnce).to.be.true;
-                        expect(cacheGetSpy.calledTwice).to.be.true;
+                        expect(cacheSetSpy.calledOnce, 'cache set called only once on second query').to.be.true;
+                        expect(postStub.calledOnce, '/check_token called only once on second query').to.be.true;
+                        expect(cacheGetSpy.calledTwice, 'cache get called twice on second query').to.be.true;
                         expect(secondJwt).to.deep.equal(firstJwt);
                     });
             });
     });
     it('returns 404 on unknown url', () => {
+        rp.post.restore();
+        postStub = sinon.stub(rp, 'post');
+        postStub.returns(Promise.reject({ statusCode: 404 }));
+
         let verifyPromise = token_util.remoteVerify(token1_expired, missingClient.issuer, missingClient.clientId, missingClient.clientSecret);
         return expect(verifyPromise).to.eventually.be.rejected
             .and.have.property('statusCode', 404);
