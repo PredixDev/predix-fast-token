@@ -3,7 +3,6 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const expect = chai.expect;
-const request = require('request');
 const rp = require('request-promise');
 const sinon = require('sinon');
 const token_util = require('../index');
@@ -58,8 +57,8 @@ let cacheGetSpy;
 
 beforeEach((done) => {
     // Mock out the get call for fetching the key (happy path)
-    reqStub = sinon.stub(request, 'get');
-    reqStub.yields(null, { statusCode: 200 }, JSON.stringify({ value: key1 }));
+    reqStub = sinon.stub(rp, 'get');
+    reqStub.returns(Promise.resolve(JSON.stringify({ value: key1 })));
 
     // Mock out the post call for check_token (happy path)
     postStub = sinon.stub(rp, 'post');
@@ -76,7 +75,7 @@ beforeEach((done) => {
 });
 
 afterEach((done) => {
-    request.get.restore();
+    rp.get.restore();
     rp.post.restore();
     cacheSetSpy.restore();
     cacheGetSpy.restore();
@@ -129,9 +128,9 @@ describe('#verify', () => {
 
     it('fail if unable to get the key', (done) => {
         // Mock out the get call for fetching the key to give an error
-        request.get.restore();
-        reqStub = sinon.stub(request, 'get');
-        reqStub.yields(null, { statusCode: 404 }, JSON.stringify({ msg: 'nope' }));
+        rp.get.restore();
+        reqStub = sinon.stub(rp, 'get');
+        reqStub.returns(Promise.reject(JSON.stringify({ msg: 'nope' })));
 
         token_util.verify(token1_valid, trusted_issuers).then((decoded) => {
             done(new Error('Should fail if unable to get the key'));
@@ -143,9 +142,9 @@ describe('#verify', () => {
 
     it('fail if no response getting the key', (done) => {
         // Mock out the get call for fetching the key to give an error
-        request.get.restore();
-        reqStub = sinon.stub(request, 'get');
-        reqStub.yields(null, null, null);
+        rp.get.restore();
+        reqStub = sinon.stub(rp, 'get');
+        reqStub.returns(Promise.reject());
 
         token_util.verify(token1_valid, trusted_issuers).then((decoded) => {
             done(new Error('Should fail no response getting the key'));
@@ -238,9 +237,9 @@ describe('#verify', () => {
 
     it('fail signed with a different key', (done) => {
         // Mock out the get call for fetching the key to give an error
-        request.get.restore();
-        reqStub = sinon.stub(request, 'get');
-        reqStub.yields(null, { statusCode: 200 }, JSON.stringify({ value: key2 }));
+        rp.get.restore();
+        reqStub = sinon.stub(rp, 'get');
+        reqStub.returns(Promise.resolve(JSON.stringify({ value: key2 })));
 
         // Using a key from another server, verification should fail
         token_util.verify(token1_valid, trusted_issuers).then((decoded) => {

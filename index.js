@@ -1,7 +1,6 @@
 'use strict';
 const jwt = require('jsonwebtoken');
-const request = require('request');
-const rp = require('request-promise'); // FIXME: change getKey to use request-promise
+const rp = require('request-promise');
 const url = require('url');
 const debug = require('debug')('predix-fast-token');
 const NodeCache = require('node-cache');
@@ -24,19 +23,15 @@ const getKey = (keyURL) => {
         } else {
             // Fetch it and cache it for later
             debug('Fetching key from:', keyURL);
-            request.get(keyURL, (err, resp, body) => {
-                const statusCode = (resp) ? resp.statusCode : 502;
-                if (err || statusCode !== 200) {
-                    err = err || 'Error reading key: ' + statusCode;
-                    debug('Error reading token key from', keyURL, err);
-                    reject(err);
-                } else {
-                    debug('Fetched key');
-                    const data = JSON.parse(body);
-                    // Cache it
-                    oauthKeyCache[keyURL] = data.value;
-                    resolve(data.value);
-                }
+            rp.get(keyURL).then(body => {
+                debug('Fetched key');
+                const data = JSON.parse(body);
+                // Cache it
+                oauthKeyCache[keyURL] = data.value;
+                resolve(data.value);
+            }).catch(err => {
+                debug('Error reading token key from', keyURL, err);
+                reject(err);
             });
         }
     });
