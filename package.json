@@ -1,6 +1,6 @@
 {
   "name": "predix-fast-token",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Node module to verify UAA tokens used when protecting REST endpoints",
   "main": "index.js",
   "scripts": {
