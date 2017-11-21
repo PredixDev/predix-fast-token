@@ -24,14 +24,14 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "istanbul": "^0.4.3",
-    "mocha": "^3.4.2",
-    "sinon": "^2.3.2"
+    "mocha": "^3.5.3",
+    "sinon": "^2.4.1"
   },
   "dependencies": {
-    "debug": "^2.6.8",
-    "jsonwebtoken": "^7.4.1",
+    "debug": "^2.6.9",
+    "jsonwebtoken": "^7.4.3",
     "node-cache": "^4.1.1",
-    "request": "^2.81.0",
-    "request-promise": "^4.2.1"
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2"
   }
 }
