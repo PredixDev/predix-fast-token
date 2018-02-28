@@ -13,38 +13,37 @@ token_utils._tokenCache = tokenCache; // Exposed for testing
 // This will fetch and cache the public key of the UAA used for this tenant.
 // This key can them be used to verify the JWT token presented so that the
 // details contained within the token can be trusted.  Such as the user, expiry and scopes.
-const getKey = (keyURL, tenantUuid) => {
-    // URL for the token is <UAA_Server>/token_key
+const getKey = (keyURL) => {
+  // URL for the token is <UAA_Server>/token_key
   return new Promise((resolve, reject) => {
-    // Check the cache
-    if (tenantUuid && oauthKeyCache[keyURL + '-' + tenantUuid]) {
-      // Already have it w/ tenantUuid.
-      resolve(oauthKeyCache[keyURL + '-' + tenantUuid]);
-    } else if (!tenantUuid && oauthKeyCache[keyURL]) {
-      // Already have it.
-      resolve(oauthKeyCache[keyURL]);
-    } else {
-      // Fetch it and cache it for later
-      debug('Fetching key from:', keyURL);
-      const options = tenantUuid ? {
-        uri: keyURL,
-        headers: {
-          tenant: tenantUuid,
-        },
-      } : {uri: keyURL};
-      rp.get(options).then(body => {
-        debug('Fetched key');
-        const data = JSON.parse(body);
-        // Cache it
-        if (tenantUuid) {
-          oauthKeyCache[keyURL + '-' + tenantUuid] = data.value;
-        } else { oauthKeyCache[keyURL] = data.value; }
-        resolve(data.value);
-      }).catch(err => {
-        debug('Error reading token key from', keyURL, err);
-        reject(err);
-      });
-    }
+      if (tenantUuid && oauthKeyCache[keyURL + '-' + tenantUuid]) {
+        // Already have it w/ tenantUuid.
+        resolve(oauthKeyCache[keyURL + '-' + tenantUuid]);
+      } else if (!tenantUuid && oauthKeyCache[keyURL]) {
+        // Already have it.
+        resolve(oauthKeyCache[keyURL]);
+      } else {
+        // Fetch it and cache it for later
+        debug('Fetching key from:', keyURL);
+        const options = tenantUuid ? {
+          uri: keyURL,
+          headers: {
+            tenant: tenantUuid,
+          },
+        } : {uri: keyURL};
+        rp.get(options).then(body => {
+          debug('Fetched key');
+          const data = JSON.parse(body);
+          // Cache it
+          if (tenantUuid) {
+            oauthKeyCache[keyURL + '-' + tenantUuid] = data.value;
+          } else { oauthKeyCache[keyURL] = data.value; }
+          resolve(data.value);
+        }).catch(err => {
+          debug('Error reading token key from', keyURL, err);
+          reject(err);
+        });
+      }
   });
 };
 
