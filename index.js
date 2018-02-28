@@ -13,7 +13,7 @@ token_utils._tokenCache = tokenCache; // Exposed for testing
 // This will fetch and cache the public key of the UAA used for this tenant.
 // This key can them be used to verify the JWT token presented so that the
 // details contained within the token can be trusted.  Such as the user, expiry and scopes.
-const getKey = (keyURL) => {
+const getKey = (keyURL, tenantUuid) => {
   // URL for the token is <UAA_Server>/token_key
   return new Promise((resolve, reject) => {
       if (tenantUuid && oauthKeyCache[keyURL + '-' + tenantUuid]) {
