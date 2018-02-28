@@ -92,7 +92,7 @@ describe('#verify', () => {
         token_util.verify(token1_valid, trusted_issuers).then((decoded) => {
             try {
                 expect(reqStub.calledOnce, '/token_key called once').to.be.true;
-                expect(reqStub.calledWith('http://localhost:8080/uaa/token_key'), '/token_key at right URI').to.be.true;
+                expect(reqStub.calledWith({uri: 'http://localhost:8080/uaa/token_key'}), '/token_key at right URI').to.be.true;
                 expect(decoded).to.exist;
                 expect(decoded.user_name).to.equal('tester');
                 done();
@@ -101,6 +101,22 @@ describe('#verify', () => {
             }
         });
     });
+
+  it('verify a token with tenant uuid', (done) => {
+    // Use a token that expires 68 years in future
+    // It is valid and signed by the correct key
+    token_util.verify(token1_valid, trusted_issuers, 'xxxxxxx').then((decoded) => {
+      try {
+        expect(reqStub.calledOnce, '/token_key called once').to.be.true;
+        expect(reqStub.calledWith({uri: 'http://localhost:8080/uaa/token_key', headers: {tenant: 'xxxxxxx'}}), '/token_key at right URI').to.be.true;
+        expect(decoded).to.exist;
+        expect(decoded.user_name).to.equal('tester');
+        done();
+      } catch (e) {
+        return done(e);
+      }
+    });
+  });
 
     it('cache the key', (done) => {
         // Call verify twice.  It should not call request on the second attempt
@@ -125,6 +141,30 @@ describe('#verify', () => {
             });
         });
     });
+
+  it('cache the key with tenant uuid', (done) => {
+    // Call verify twice.  It should not call request on the second attempt
+    token_util.verify(token1_valid, trusted_issuers, 'xxxxxxx').then((decoded) => {
+      try {
+        expect(reqStub.calledOnce, '/token_key called only once').to.be.true;
+        expect(decoded).to.exist;
+        expect(decoded.user_name).to.equal('tester');
+      } catch (e) {
+        return done(e);
+      }
+
+      token_util.verify(token1_valid, trusted_issuers, 'xxxxxxx').then((decoded) => {
+        try {
+          expect(reqStub.calledOnce, '/token_key called only once').to.be.true;
+          expect(decoded).to.exist;
+          expect(decoded.user_name).to.equal('tester');
+          done();
+        } catch (e) {
+          return done(e);
+        }
+      });
+    });
+  });
 
     it('fail if unable to get the key', (done) => {
         // Mock out the get call for fetching the key to give an error

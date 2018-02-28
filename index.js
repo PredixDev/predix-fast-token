@@ -13,28 +13,38 @@ token_utils._tokenCache = tokenCache; // Exposed for testing
 // This will fetch and cache the public key of the UAA used for this tenant.
 // This key can them be used to verify the JWT token presented so that the
 // details contained within the token can be trusted.  Such as the user, expiry and scopes.
-const getKey = (keyURL) => {
-    // URL for the token is <UAA_Server>/token_key
-    return new Promise((resolve, reject) => {
-        // Check the cache
-        if (oauthKeyCache[keyURL]) {
-            // Already have it.
-            resolve(oauthKeyCache[keyURL]);
-        } else {
-            // Fetch it and cache it for later
-            debug('Fetching key from:', keyURL);
-            rp.get(keyURL).then(body => {
-                debug('Fetched key');
-                const data = JSON.parse(body);
-                // Cache it
-                oauthKeyCache[keyURL] = data.value;
-                resolve(data.value);
-            }).catch(err => {
-                debug('Error reading token key from', keyURL, err);
-                reject(err);
-            });
-        }
-    });
+const getKey = (keyURL, tenantUuid) => {
+  // URL for the token is <UAA_Server>/token_key
+  return new Promise((resolve, reject) => {
+      if (tenantUuid && oauthKeyCache[keyURL + '-' + tenantUuid]) {
+        // Already have it w/ tenantUuid.
+        resolve(oauthKeyCache[keyURL + '-' + tenantUuid]);
+      } else if (!tenantUuid && oauthKeyCache[keyURL]) {
+        // Already have it.
+        resolve(oauthKeyCache[keyURL]);
+      } else {
+        // Fetch it and cache it for later
+        debug('Fetching key from:', keyURL);
+        const options = tenantUuid ? {
+          uri: keyURL,
+          headers: {
+            tenant: tenantUuid,
+          },
+        } : {uri: keyURL};
+        rp.get(options).then(body => {
+          debug('Fetched key');
+          const data = JSON.parse(body);
+          // Cache it
+          if (tenantUuid) {
+            oauthKeyCache[keyURL + '-' + tenantUuid] = data.value;
+          } else { oauthKeyCache[keyURL] = data.value; }
+          resolve(data.value);
+        }).catch(err => {
+          debug('Error reading token key from', keyURL, err);
+          reject(err);
+        });
+      }
+  });
 };
 
 token_utils.clearCache = () => {
@@ -48,11 +58,12 @@ token_utils.clearCache = () => {
  *
  * @param {string} token - The access token.
  * @param {string} trusted_issuers - A list of trusted issuer URIs
+ * @param {string} tenantUuid - (optional) Used for tenant based UAA
  * @returns {promise} - A promise to verify the token.
  *                      Resolves with the decoded token if valid.
  *                      Rejected with an error if invalid or an error occurs.
  */
-token_utils.verify = (token, trusted_issuers) => {
+token_utils.verify = (token, trusted_issuers, tenantUuid) => {
     return new Promise((resolve, reject) => {
         // Decode the token to get the issuer
         let prelim = null;
@@ -68,7 +79,7 @@ token_utils.verify = (token, trusted_issuers) => {
             const uaa_path = issuer.pathname.replace('/oauth/token', '');
             const uaa_server = url.format({ protocol: issuer.protocol, host: issuer.host, pathname: uaa_path + '/token_key' });
             // Grab the key for this UAA server and check.
-            getKey(uaa_server).then((key) => {
+            getKey(uaa_server, tenantUuid).then((key) => {
                 jwt.verify(token, key, (err, decoded) => {
                     if (err) {
                         debug('Invalid', err);
